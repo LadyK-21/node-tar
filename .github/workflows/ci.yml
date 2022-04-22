@@ -38,7 +38,6 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - 10.0.0
           - 10.x
           - 12.x
           - 14.x
@@ -55,6 +54,9 @@ jobs:
       run:
         shell: ${{ matrix.platform.shell }}
     steps:
+      - name: Setup git config
+        run: |
+          git config --global core.longpaths true
       - uses: actions/checkout@v3
       - name: Setup git user
         run: |
@@ -82,4 +84,9 @@ jobs:
         run: npm i --prefer-online --no-fund --no-audit -g npm@latest
       - run: npm -v
       - run: npm i --ignore-scripts --no-audit --no-fund
-      - run: npm test --ignore-scripts
+      - if: matrix.platform.os != 'windows-latest'
+        run: npm test --ignore-scripts
+      - if: matrix.platform.os == 'windows-latest'
+        run: npm test --ignore-scripts
+        env:
+          TAP_RCFILE: test/fixtures/.taprc.win32
